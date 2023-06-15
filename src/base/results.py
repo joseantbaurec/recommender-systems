@@ -32,6 +32,9 @@ class Results:
         ]
         return sum(instances) / min(self.n_relevant_items, self.n_recommendations)
 
+    def hit_rate_at_k(self, k: int) -> int:
+        return int(self._matches_first_k_recommendations(k).any())
+
     def rank_at_k(self, k: int) -> int:
         new_index_matches = self._matches_first_k_recommendations(k)
         rank = new_index_matches.values.argmax()

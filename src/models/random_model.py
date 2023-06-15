@@ -14,7 +14,7 @@ class RandomRecommender(RecommenderModel):
     def setup_model(self, **kwargs):
         pass
 
-    def model_name(self):
+    def model_name(self) -> str:
         return "Random Recommender model"
 
     def _get_recommendations(

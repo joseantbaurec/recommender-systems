@@ -5,6 +5,10 @@ data/shopping/**
 res/figures/items_per_user.json
 res/figures/sales_count.json
 
+# ignore testing files
+src/testing.ipynb
+src/testing.py
+
 ##########################
 # Common files
 

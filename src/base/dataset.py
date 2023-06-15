@@ -130,7 +130,7 @@ class DataSet:
     def get_random_product_from_user(
         self, user: str, for_validation: bool = False
     ) -> str:
-        prefix = ''
+        prefix = 'train_'
         if for_validation:
             prefix = 'validation_'
         user_items = self.users.loc[user, prefix + 'relevant_items']

@@ -48,7 +48,7 @@ class RecommenderModel(ABC):
             user = self.dataset.get_random_user().name
             if not silent:
                 print(f'Chose user {user} as recommender target')
-        user_items = self.dataset.users.loc[user, 'relevant_items']
+        user_items = self.dataset.users.loc[user, 'train_relevant_items']
         if item is None:
             item = random.choice(user_items)
             if not silent:
@@ -112,11 +112,17 @@ class RecommenderModel(ABC):
                 'format': lambda x: f'{x:.4f}',
                 'calc': lambda x, r: x.recall_at_k(r),
             },
-            f'P@{k} (HR@{k})': {
+            f'P@{k}': {
                 'values_full': [],
                 'values_validation': [],
                 'format': lambda x: f'{x*100:.2f}%',
                 'calc': lambda x, r: x.precision_at_k(r),
+            },
+            f'HR@{k}': {
+                'values_full': [],
+                'values_validation': [],
+                'format': lambda x: f'{x*100:.2f}%',
+                'calc': lambda x, r: x.hit_rate_at_k(r),
             },
             f'Rank@{k}': {
                 'values_full': [],
