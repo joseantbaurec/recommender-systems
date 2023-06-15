@@ -31,10 +31,8 @@ class Word2VecRecommender(RecommenderModel):
         group_count = self.dataset.relevants.groupby('user_session').agg(
             item_count=('product_id', 'count')
         )['item_count']
-        group_count = group_count[group_count >= 5]
 
         events = self.dataset.relevants
-        events = events[events['user_session'].isin(group_count.index)]
         events = events.sort_values(['user_session', 'event_time'])
         # Build sessions by grouping by "user_session". Avoid groupby if possible
         sessions = []
@@ -48,7 +46,7 @@ class Word2VecRecommender(RecommenderModel):
         return sessions
 
     def _train_word2vec_model(self) -> gensim.models.Word2Vec:
-        model = gensim.models.Word2Vec(min_count=3, workers=4)
+        model = gensim.models.Word2Vec(min_count=1, workers=4)
         model.build_vocab(self.sessions)
         model.train(
             self.sessions, total_examples=model.corpus_count, epochs=30, report_delay=1

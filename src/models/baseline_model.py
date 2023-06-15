@@ -34,7 +34,7 @@ class BaselineRecommender(RecommenderModel):
                 matrix[index1, index2] += 1
         return matrix
 
-    def model_name(self):
+    def model_name(self) -> str:
         return "Baseline Recommender model"
 
     def _get_recommendations(
