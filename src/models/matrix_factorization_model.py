@@ -39,27 +39,36 @@ class MatrixFactorizationRecommender(RecommenderModel):
         self.user_item_confidence = self._extract_user_item_confidence()
         print('Starting PySpark session...')
         self.spark = (
-            SparkSession.builder.master('local[1]').appName('recsys.com').getOrCreate()
+            SparkSession.builder.master('local[*]')
+            .appName('RecSys')
+            .config('spark.executor.memory', '10g')
+            .config('spark.executor.cores', 6)
+            .config('spark.driver.memory', '12g')
+            .config('spark.driver.maxResultSize', 0)
+            .getOrCreate()
         )
         print('Training ALS model...')
         self.model = self._train_ALS_model(cross_validate_model)
         print('Done!')
 
     def _extract_user_item_confidence(self) -> pd.DataFrame:
-        confidence = self.dataset.relevants.groupby(['user_id', 'product_id']).agg(
+        confidence = self.dataset.views.groupby(['user_id', 'product_id']).agg(
             confidence=('category_id', 'count')
         )
         confidence = confidence.reset_index()
         return confidence
 
     def _train_ALS_model(self, cross_validate_model: bool) -> ALSModel:
-        confidence_DF = self.spark.createDataFrame(self.user_item_confidence)
-        confidence_DF = confidence_DF.withColumn(
-            'user', split(confidence_DF['user_id'], '-').getItem(1).cast('int')
+        print('Parsing data...')
+        confidence = self.user_item_confidence
+        confidence['user'] = confidence['user_id'].str.split('-').str[1].astype(int)
+        confidence['product'] = (
+            confidence['product_id'].str.split('-').str[1].astype(int)
         )
-        confidence_DF = confidence_DF.withColumn(
-            'product', split(confidence_DF['product_id'], '-').getItem(1).cast('int')
+        confidence_DF = self.spark.createDataFrame(
+            confidence[['user', 'product', 'confidence']]
         )
+        confidence_DF.repartition(50)
         als = ALS(
             implicitPrefs=True,
             userCol='user',
@@ -67,6 +76,7 @@ class MatrixFactorizationRecommender(RecommenderModel):
             ratingCol='confidence',
             coldStartStrategy='drop',
         )
+        print('Fitting model...')
         if cross_validate_model:
             params = (
                 ParamGridBuilder()

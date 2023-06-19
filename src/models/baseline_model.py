@@ -2,6 +2,7 @@ import itertools
 
 import pandas as pd
 from scipy import sparse
+from tqdm import tqdm
 
 from models.abstract_model import RecommenderModel
 
@@ -25,8 +26,9 @@ class BaselineRecommender(RecommenderModel):
     def _get_co_occurrence_matrix(self) -> sparse.dok_matrix:
         n_items = self.dataset.n_products
         matrix = sparse.dok_array((n_items, n_items))
-        for _, user in self.dataset.users.iterrows():
-            for item1, item2 in itertools.combinations(user['train_relevant_items'], 2):
+        for user in tqdm(self.dataset.users.index):
+            items = self.dataset.users.loc[user, 'train_relevant_items']
+            for item1, item2 in itertools.combinations(items, 2):
                 index1 = self.dataset.product_to_index[item1]
                 index2 = self.dataset.product_to_index[item2]
                 if index2 < index1:
@@ -34,6 +36,7 @@ class BaselineRecommender(RecommenderModel):
                 matrix[index1, index2] += 1
         return matrix
 
+    @property
     def model_name(self) -> str:
         return "Baseline Recommender model"
 
