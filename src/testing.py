@@ -1,25 +1,16 @@
-import random
-
 import pandas as pd
 
 from base.dataset import DataSet
-from base.results import Results
-from models.ad_hoc_model import AdHocRecommender
-from models.word2vec_model import Word2VecRecommender
+from base.plotting import plot_long_tail
+from models.baseline_model import BaselineRecommender
 
 if __name__ == "__main__":
-    transactions: pd.DataFrame = pd.read_parquet(
-        '/Users/josean/Desktop/Playground/recommender-systems/data/shopping/e-commerce.parquet.gzip'
-    )
+    import os
 
-    transactions.sample(frac=0.5).to_parquet(
-        '/Users/josean/Desktop/Playground/recommender-systems/data/shopping/e-commerce_small.parquet.gzip',
-        compression='gzip',
-    )
-    transactions.sample(frac=0.25).to_parquet(
-        '/Users/josean/Desktop/Playground/recommender-systems/data/shopping/e-commerce_smaller.parquet.gzip',
-        compression='gzip',
-    )
+    os.chdir('..')
+    dataset = DataSet()
+    dataset.to_pickle()
+
     # dataset = DataSet()
     # model = Word2VecRecommender(
     #     dataset=dataset
