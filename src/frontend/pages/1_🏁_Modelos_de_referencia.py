@@ -82,22 +82,26 @@ with col1:
     st.header('🧮 Estadísticas 💯')
     vspace(1)
     write(
-        'Entrenado sobre un dataset de e-commerce donde los usuarios compran productos de distintas categorías, decidimos evaluar el modelo de co-popularidad. Para ser lo más '
-        'exhaustivo posible, contabilizamos varias métricas: tiempo de entrenamiento, tiempo de evaluación, precisión, exhaustividad y otras métricas propias de los sistemas '
-        'de recomendación.'
+        'Entrenado sobre un dataset de e-commerce donde los usuarios compran productos de distintas categorías, decidimos evaluar el modelo de co-popularidad. Para ser lo más exhaustivo '
+        'posible, contabilizamos varias métricas: tiempo de entrenamiento, tiempo de evaluación, precisión, exhaustividad y otras métricas propias de los sistemas de recomendación. Una '
+        'de las más útiles es el '
+        + highlight('**Hit Rate**', colors.HIGHLIGHT_GRAY)
+        + ' o *tasa de acierto*: 1 si alguna recomendación es relevante, 0 si no.'
     )
     vspace(1)
 
-_, col1, _ = st.columns([0.1, 3, 0.7])
+col1, _, col2, _ = st.columns([3, 0.1, 3, 0.7])
 with col1:
+    write('<u>*Entrenamiento*</u>')
     metrics = [
-        ['53.288s', '-', '-', '-'],
-        ['0.612s', '0.609s', '0.643s', '0.598s'],
-        ['0.1374', '0.0742', '0.8521', '0'],
-        ['0.1716', '0.1333', '0.75', '0'],
-        ['23.3%', '20%', '90%', '0%'],
-        ['2.9405', '2', '10', '-'],
-        ['0.4695', '0.5', '1', '0'],
+        ['1h 30min', '-', '-', '-'],
+        ['0.634s', '0.630s', '0.667s', '0.612s'],
+        ['0.1133', '0.0558', '0.7675', '0'],
+        ['0.1076', '0.0909', '0.6667', '0'],
+        ['18.20%', '15%', '80%', '0%'],
+        ['67%', '100%', '100%', '0%'],
+        ['2.6567', '2', '10', '-'],
+        ['0.4279', '0.2917', '1', '0'],
     ]
     cols = ['Media', 'Mediana', 'Más alto', 'Más bajo']
     indx = [
@@ -106,17 +110,49 @@ with col1:
         'MAP@k',
         'R@k',
         'P@k',
+        'HR@k',
+        'Rango@k',
+        'RangoRec@k',
+    ]
+    metrics = pd.DataFrame(metrics, columns=cols, index=indx)
+    st.dataframe(metrics, use_container_width=True)
+with col2:
+    write('<u>*Validación*</u>')
+    metrics = [
+        ['-', '-', '-', '-'],
+        ['-', '-', '-', '-'],
+        ['0.0715', '0', '1', '0'],
+        ['0.1385', '0', '1', '0'],
+        ['4.60%', '0%', '30%', '0%'],
+        ['32%', '0%', '100%', '0'],
+        ['3.5312', '3', '9', '-'],
+        ['0.1539', '0', '1', '0'],
+    ]
+    cols = ['Media', 'Mediana', 'Más alto', 'Más bajo']
+    indx = [
+        'T. Entrenamiento',
+        'T. Evaluación',
+        'MAP@k',
+        'R@k',
+        'P@k',
+        'HR@k',
         'Rango@k',
         'RangoRec@k',
     ]
     metrics = pd.DataFrame(metrics, columns=cols, index=indx)
     st.dataframe(metrics, use_container_width=True)
 
+
 col1, _ = st.columns([8.5, 1])
 with col1:
+    st.header('📝 Conclusiones 💬')
     write(
-        'El tiempo de entrenamiento es un *one-off*, ya que el trabajo duro se realiza la primera vez al construir la matriz. Diferentes implementaciones de matrices dispersas '
-        'ayudan a acelerar el tiempo y disminuir el espacio en memoria, pero pueden empeorar el tiempo de consulta (que se mantiene constante en sucesivas peticiones).'
+        'Vemos como el tiempo de entrenamiento es bastante alto para un modelo tan simple: esto se debe a la construcción de la matriz de co-popularidad, que si bien es muy eficiente '
+        'para almacenar (muy poco densa), es costosa de calcular. Sin embargo, una vez calculada, fácilmente podemos añadir nuevas observaciones, así que el modelo '
+        + highlight('**escala**', colors.HIGHLIGHT_GREEN)
+        + ' bastante bien. Similarmente, las reglas ad-hoc no resultan difíciles de expandir y complementar con nuevas reglas, y pueden aprovechar al máximo todo el '
+        + highlight('**conocimiento experto**', colors.HIGHLIGHT_BLUE)
+        + ' que se tenga sobre el banco de productos/usuarios.'
     )
     write(
         'Este modelo, como muchos otros, sufre fuertemente de '
@@ -129,21 +165,12 @@ with col1:
         'candidatos disponibles.'
     )
     write(
-        'A pesar de todo, el modelo es una referencia base por buenos motivos: la <u>*tasa de acierto*</u> está alrededor del 23%, y el esfuerzo ha sido bastante pequeño. Sin embargo, '
-        'no es más que un punto de partida, ya que claramente vemos cómo pasan factura los problemas anteriores: cuando evaluamos el modelo con información nueva, vemos que su '
-        'puntuación se queda por los suelos.'
+        'Frecuentemente, utilizamos los modelos **Ad-Hoc** como herramientas de '
+        + highlight('**ranking**', colors.HIGHLIGHT_GREEN)
+        + ', al ser capaces de inyectar preferencias de negocio en constante cambio de manera eficaz y controlable. En contraste, la mayoría de modelos que expondremos suelen ser '
+        'mejor aprovechados como herramientas '
+        + highlight('**híbridas**', colors.HIGHLIGHT_GREEN)
+        + ' o de '
+        + highlight('**sampling**', colors.HIGHLIGHT_GREEN)
+        + ', para reducir la búsqueda de candidatos.'
     )
-vspace(1)
-_, col1, _ = st.columns([0.1, 3, 0.7])
-with col1:
-    metrics = [
-        ['0.0785', '0', '0.6429', '0'],
-        ['0.1728', '0', '1', '0'],
-        ['4.10%', '0%', '30%', '0%'],
-        ['3.3030', '3', '8', '1'],
-        ['0.1540', '0', '1', '0'],
-    ]
-    cols = ['Media', 'Mediana', 'Más alto', 'Más bajo']
-    indx = ['MAP@k', 'R@k', 'P@k', 'Rango@k', 'RangoRec@k']
-    metrics = pd.DataFrame(metrics, columns=cols, index=indx)
-    st.dataframe(metrics, use_container_width=True)

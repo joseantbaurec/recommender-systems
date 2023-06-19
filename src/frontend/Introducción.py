@@ -56,7 +56,7 @@ with col2:
     )
     bullet_item(
         highlight('**Collaborative Filtering**', utils.HIGHLIGHT_GREEN)
-        + ', donde medimos similitud entre <u>*usuarios*</u>: si el usuario X es "similar" al usuario Y, y el producto '
+        + ', donde medimos similitud a través de los <u>*usuarios*</u>: si el usuario X es "similar" al usuario Y, y el producto '
         'P le gustó a Y, entonces le gustará a X.'
     )
     bullet_item(
