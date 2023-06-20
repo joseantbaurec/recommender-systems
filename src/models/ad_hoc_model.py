@@ -47,6 +47,7 @@ class AdHocRecommender(RecommenderModel):
         self.brand_score_weight = brand_score_weight
         self.popularity_score_weight = popularity_score_weight
 
+    @property
     def model_name(self) -> str:
         return "Ad-Hoc Recommender model"
 

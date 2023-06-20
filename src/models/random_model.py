@@ -14,6 +14,7 @@ class RandomRecommender(RecommenderModel):
     def setup_model(self, **kwargs):
         pass
 
+    @property
     def model_name(self) -> str:
         return "Random Recommender model"
 

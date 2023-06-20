@@ -34,7 +34,7 @@ def setup_page():
         background: linear-gradient(149deg, rgba(255,255,255,1) 0%, rgba(255,175,0,1) 53%, rgba(85,87,107,1) 97%);
     }
     .css-18ni7ap {
-        visibility: hidden;
+        visibility: visible;
     }
     </style>
     """,

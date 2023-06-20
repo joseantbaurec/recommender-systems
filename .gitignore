@@ -1,5 +1,6 @@
 # ignore all datasets, download them from an external source
-data/shopping/**
+data/**
+
 
 # ignore heavy figures stored as JSON
 res/figures/items_per_user.json

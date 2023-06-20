@@ -4,62 +4,58 @@ import random
 import pandas as pd
 
 
-def _get_file_from_dataset_size(dataset_size: str, file_type: str = 'parquet') -> str:
-    base_path = 'data/shopping/e-commerce<dataset_size>.<file_type>'
-    match dataset_size:
-        case 'full':
-            size = ''
-        case 'small':
-            size = '_small'
-        case 'smaller':
-            size = '_smaller'
-        case _:
-            raise ValueError(f'Unrecognized dataset size: {dataset_size}')
-    match file_type:
-        case 'parquet':
-            extension = 'parquet.gzip'
-        case 'pickle':
-            extension = 'pickle'
-        case _:
-            print(f'Warning: Unhandled file extension .{file_type}')
-            extension = file_type
-    base_path = base_path.replace('<dataset_size>', size)
-    base_path = base_path.replace('<file_type>', extension)
-    return base_path
-
-
 class DataSet:
     subcategory_depth = 1
 
-    @classmethod
-    def from_pickle(cls, dataset_size: str = 'small') -> 'DataSet':
-        file_path = _get_file_from_dataset_size(dataset_size, file_type='pickle')
+    @staticmethod
+    def from_pickle(file_path='data/shopping/e-commerce_dataset.pickle') -> 'DataSet':
         with open(file_path, 'rb') as file:
             print('Reading file...')
             loaded_dataset: DataSet = pickle.load(file)
         print('Done!')
         return loaded_dataset
 
+    def to_pickle(self, file_path='data/shopping/e-commerce_dataset.pickle'):
+        with open(file_path, 'wb') as file:
+            print('Writing file...')
+            pickle.dump(self, file)
+        print('Done!')
+
     def __init__(
-        self, dataset_size: str = 'small', train_test_split: float = 0.2, **kwargs
+        self,
+        transactions_parquet_file: str = 'data/shopping/e-commerce.parquet.gzip',
+        train_test_split: float = 0.2,
+        **kwargs,
     ):
-        print('Reading file...')
-        file_path = _get_file_from_dataset_size(dataset_size)
-        transactions: pd.DataFrame = pd.read_parquet(file_path)
-        print('Parsing dataset...')
+        print('Reading transactions file...')
+        transactions: pd.DataFrame = pd.read_parquet(transactions_parquet_file)
+
+        print('Labelling dataset...')
         transactions['product_id'] = 'P-' + transactions['product_id'].astype(str)
         transactions['user_id'] = 'U-' + transactions['user_id'].astype(str)
         transactions['user_session'] = 'S-' + transactions['user_session'].astype(str)
         self.all_transactions: pd.DataFrame = transactions
+
+        print("Extracting user's relevant items...")
+        self.users: pd.DataFrame = self._get_users(train_test_split)
+        print('Separating into train and test...')
+        split = self.all_transactions.apply(
+            lambda row: row['product_id']
+            in self.users.loc[row['user_id'], 'train_relevant_items'],
+            axis=1,
+        )
+        self.all_transactions = self.all_transactions.loc[split]
+
         print('Building metrics...')
         self.metrics: pd.DataFrame = self.purchases.groupby('product_id').agg(
             sales_count=('product_id', 'count'),
             total_sales=('price', 'sum'),
         )
+
         print('Inferring product list...')
         self.products: pd.DataFrame = self._get_products()
+
         print('Building user-item relations...')
-        self.users: pd.DataFrame = self._get_users(train_test_split)
         pti, itp, ipt = self._index_products()
         self.product_to_index: dict[str, int] = pti
         self.index_to_product: dict[int, str] = itp
@@ -105,7 +101,7 @@ class DataSet:
         return products
 
     def _get_users(self, train_test_split: float) -> pd.DataFrame:
-        users = self.relevants.groupby('user_id').agg(
+        users = self.all_transactions.groupby('user_id').agg(
             relevant_items=('product_id', lambda x: list(x.drop_duplicates()))
         )
         users['n_relevant'] = users['relevant_items'].apply(len)
@@ -137,13 +133,15 @@ class DataSet:
         item = random.choice(user_items)
         return item
 
-    def get_random_user(self, minimum_interactions: int = 10) -> pd.Series:
-        user = (
-            self.users.query(f"n_relevant >= {minimum_interactions}")
-            .sample(n=1)
-            .iloc[0]
-        )
-        return user
+    def get_random_user(
+        self, minimum_interactions: int = 10, for_validation: bool = False
+    ) -> pd.Series:
+        users = self.users.query(f"n_relevant >= {minimum_interactions}")
+        random_user = users.sample(n=1).iloc[0]
+        if for_validation:
+            while len(random_user['validation_relevant_items']) < 1:
+                random_user = users.sample(n=1).iloc[0]
+        return random_user
 
     @property
     def n_products(self) -> int:

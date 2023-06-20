@@ -1,8 +1,10 @@
+import pickle
 import random
 import time
 from abc import ABC, abstractmethod
 from typing import Any
 
+import numpy as np
 import pandas as pd
 from prettytable import PrettyTable
 from tqdm import tqdm
@@ -25,6 +27,13 @@ class RecommenderModel(ABC):
         self.setup_model(**kwargs)
         t1 = time.perf_counter()
         self.setup_time = t1 - t0
+
+    def to_pickle(self, file_path='data/models/<model_name>.pickle'):
+        file_path = file_path.replace('<model_name>', self.__class__.__name__)
+        with open(file_path, 'wb') as file:
+            print('Saving model...')
+            pickle.dump(self, file)
+        print('Done!')
 
     @property
     @abstractmethod
@@ -54,9 +63,15 @@ class RecommenderModel(ABC):
             if not silent:
                 print(f'Chose item {item} as recommender prompt')
 
-        recommendations, model_info = self._get_recommendations(
-            user, item, n_recommendations, **kwargs
-        )
+        try:
+            recommendations, model_info = self._get_recommendations(
+                user, item, n_recommendations, **kwargs
+            )
+        except Exception as e:
+            if not silent:
+                print(f'Could not handle prompt from user {user} and item {item}.')
+            recommendations = pd.Series([np.nan] * n_recommendations)
+            model_info = None
         results = Results(recommendations, user_items)
         if validation_run:
             results = [
@@ -138,7 +153,7 @@ class RecommenderModel(ABC):
             },
         }
         for i in tqdm(range(n_runs)):
-            user = str(self.dataset.get_random_user().name)
+            user = str(self.dataset.get_random_user(for_validation=True).name)
             results, _ = self.recommend(
                 user, n_recommendations=k, silent=True, validation_run=True
             )
