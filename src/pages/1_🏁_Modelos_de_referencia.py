@@ -1,7 +1,9 @@
 import pandas as pd
 import streamlit as st
+
 import utils as colors
-from utils import bullet_item, highlight, plotly_from_json, setup_page, vspace, write
+from base.plotting import plotly_from_json
+from utils import bullet_item, highlight, setup_page, vspace, write
 
 # page configs
 setup_page()

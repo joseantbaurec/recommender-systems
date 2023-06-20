@@ -4,8 +4,10 @@ Frontend landing page for the interactive demo of RecSys
 
 """
 import streamlit as st
+
 import utils
-from utils import bullet_item, highlight, plotly_from_json, setup_page, vspace, write
+from base.plotting import plotly_from_json
+from utils import bullet_item, highlight, setup_page, vspace, write
 
 # page configs
 setup_page()
@@ -160,6 +162,6 @@ vspace(1)
 _, col1, _ = st.columns([0.1, 3, 0.5])
 with col1:
     write(
-        'En el menú de la derecha podemos explorar los diferentes *modelos base* que pudiéramos utilizar para construir un sistema de recomendación. Evaluamos su *performance*, su *precisión* '
+        'En el menú de la izquierda podemos explorar los diferentes *modelos base* que pudiéramos utilizar para construir un sistema de recomendación. Evaluamos su *performance*, su *precisión* '
         'y cómo reaccionan ante el re-entrenamiento y el *Cold Start*.'
     )

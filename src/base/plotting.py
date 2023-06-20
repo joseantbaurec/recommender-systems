@@ -1,10 +1,10 @@
 import random
 
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from ipywidgets import widgets
+from plotly.io import read_json
 
 from base.results import Results
 
@@ -69,4 +69,9 @@ def plot_recall_precision(recommendations: Results | dict[str, Results]) -> go.F
     fig.update_xaxes(title='Recall @ k')
     fig.update_yaxes(title='Precision @ k')
     fig.update_layout(title='Recall vs Precision plot')
+    return fig
+
+
+def plotly_from_json(path: str) -> go.Figure:
+    fig = read_json(path)
     return fig
