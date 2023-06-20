@@ -1,7 +1,5 @@
-import plotly.graph_objects as go
 import streamlit as st
 from annotated_text import annotation
-from plotly.io import read_json
 
 HIGHLIGHT_BLUE = '#5c99fa'
 HIGHLIGHT_RED = '#fa4646'
@@ -57,8 +55,3 @@ def write(text: str):
 
 def bullet_item(text: str):
     write('▶️ ' + text)
-
-
-def plotly_from_json(path: str) -> go.Figure:
-    fig = read_json(path)
-    return fig
